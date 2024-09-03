@@ -10,16 +10,16 @@
 int ENFATransitions[MAX_STATes][MAX_ALPHABET][MAX_NEXT_STATes], nFinalState, finalStates[20], nENFATransitions=0;
 int epsilon_trans[20][2];
 int newStates[MAX_STATes][MAX_STATes];
-int NFATransitions[MAX_STATes][MAX_ALPHABET];
+int NFATransitions[MAX_STATes][MAX_ALPHABET], nNFATransitions=0;
 
 void initializeENFATransitions() {
     memset(ENFATransitions, -1, sizeof(ENFATransitions));  // No transition initially
 }
 void initializeNFATransitions(){
-	memset(NFATransitions, -1, sizeof(NFATransitions));
+	memset(NFATransitions, -1, sizeof(NFATransitions));    // No Transition initially
 }
 void initializeNewStates(){
-	memset(newStates, -1, sizeof(newStates));  // No transition initially
+	memset(newStates, -1, sizeof(newStates));  // No states initially
 }
 void addENFATransition(int state, int symbol, int nextState) {
     int j;
@@ -34,41 +34,23 @@ void addENFATransition(int state, int symbol, int nextState) {
     }
 }
 
-void printENFATransitions(int s, int n, int states[], char input[]){
-	for (int i = 0; i < s; i++){  
-        for (int j = 0; j < n; j++){
-            for (int k = 0; k < MAX_NEXT_STATes; k++)
-                if(ENFATransitions[states[i]][input[j]-97][k] != -1){
-					printf("%d\t",states[i]);
-            		printf("%c\t",input[j]);
-                    printf("%d\n", ENFATransitions[states[i]][input[j]-97][k]);
-				}
-                else
-                    break;
-        }
-    }
-}
-int* getENFATransition(int s, int n, int state, char input){
-	return ENFATransitions[state][input-97];
-}
-
 void findClosure(int newStates[], int state, int epsilon_trans[][2], int nEpsilonTrans){
 	int i,j;
 	for(i=0; i<nEpsilonTrans; i++){
 		if(epsilon_trans[i][0]==state){
 			j=0;
-			while(newStates[j] != -1)
+			while(newStates[j] != -1){
+				if(newStates[j]==epsilon_trans[i][1]){
+					break;
+				}
 				j++;
+			}
 			newStates[j]=epsilon_trans[i][1];
 			findClosure(newStates, epsilon_trans[i][1], epsilon_trans, nEpsilonTrans);
 		}
 	}
 }
-void printETransitions(int nEpsilonTrans){
-	printf("\nEpsilon Transitions\n");
-	for(int i=0;i<nEpsilonTrans; i++)
-		printf("%d e %d\n",epsilon_trans[i][0],epsilon_trans[i][1]);
-}
+
 
 bool isElementInArray(int arr[], int size, int element) {
     for(int i = 0; i < size; i++) {
@@ -78,17 +60,7 @@ bool isElementInArray(int arr[], int size, int element) {
     }
     return false;  // Element not found
 }
-void printArray(int arr[], int size){
-	for(int i = 0; i < size; i++) {
-        printf("%d\t", arr[i]);
-    }
-	printf("\n");
-}
-void copyArray(int source[], int destination[], int size) {
-    for (int i = 0; i < size; i++) {
-        destination[i] = source[i];
-    }
-}
+
 
 int compare(const void *a, const void *b) {
     return (*(int *)a - *(int *)b);
@@ -165,50 +137,31 @@ int main(){
 	}
 	int nEpsilonTrans=j;
 	printf("\n\n");
-	printENFATransitions(s,n,states,input);
-	printETransitions(nEpsilonTrans);
 	
+	// finding closure of all states
 	for(i=0; i<s; i++){
 		findClosure(newStates[states[i]], states[i], epsilon_trans, nEpsilonTrans);
-		printf("Epsilon closure of q%d = { ",states[i]);
-		j=0;
-		while(newStates[states[i]][j] != -1){
-			printf("q%d ",newStates[states[i]][j]);
-			j++;
-		}
-		printf("}\n");
 	}
     int* currentENFATransition;
 	int nextState[MAX_STATes], m;
 	for(i=0; i<s; i++){
-		printf("state=%d\n", states[i]);
 		for(j=0; j<n; j++){
 			if(input[j]=='e') continue;
-			printf("input=%c\n", input[j]);
 			memset(temp, -1, sizeof(temp));
 			t=0; // index for temp
 			k=0; // index for closure elements
 			while(newStates[states[i]][k] != -1){
-				printf("Closure[%d]=%d\n", k, newStates[states[i]][k]);
 				currentENFATransition = ENFATransitions[ newStates[ states[i] ][ k ] ][ input[j]-97 ];
-				printf("Current ENFA Transition = ");
-				printArray(currentENFATransition, 10);
 				for (l = 0; l < MAX_NEXT_STATes; l++){
 					if(currentENFATransition[l] != -1){
 						if(!isElementInArray(temp, t, currentENFATransition[l])){
 							temp[t++] = currentENFATransition[l];
-						}
-							
-						//printf("%d\t",newStates[states[i]][k]);
-						//printf("%c\t",input[j]);
-						//printf("%d\n", currentENFATransition[l]);
+						}	
 					}
 					else break;
 				}
 				k++;
 			}
-			printf("\nTemp= ");
-			printArray(temp, t);
 			m=0;
 			for(k=0; k<t; k++){
 				l=0;
@@ -216,26 +169,75 @@ int main(){
 					nextState[m++]=newStates[temp[k]][l];
 					l++;
 				}
-				
 			}
-			printf("\nNext State= ");
-			printArray(nextState, m);
 			for(k=0; k<nNewStates; k++){
 				t=0;
-				while(newStates[k][t]!=-1){
-					t++;
-				}
-				printf("\nhere k = %d We are comparing ", states[k]);
-				printArray(newStates[states[k]],t);
-				printf("and ");
-				printArray(nextState,l);
+				while(newStates[states[k]][t]!=-1) t++;
 				if(arraysHaveSameElements(newStates[states[k]], nextState, t, l)){
 					NFATransitions[states[i]][input[j]-97]=states[k];
-					printf("%d %c %d\n", states[i], input[j], states[k]);
+					nNFATransitions++;
 				}
 			}
-			
 		}	
 	}
+	printf("\nEquivalent NFA without epsilon\n");
+	printf("------------------------------\n");
+	printf("Start State: { ");
+	k=0;
+	while(newStates[startState][k]!=-1){
+		printf("q%d, ", newStates[startState][k]);
+		k++;
+	}
+	printf("}\nAlphabets: ");
+	for(i=0; i<n; i++)
+		printf("%c ",input[i]);
+	printf("\nStates: ");
+	for(i=0; i<nNewStates; i++){
+		printf("{");
+		k=0;
+		while(newStates[states[i]][k]!=-1){
+			printf("q%d, ", newStates[states[i]][k]);
+			k++;
+		}
+		printf("}   ");
+	}
+	printf("\nTransitions are...:\n");
+	for(i=0; i<nNewStates; i++){
+		for(j=0; j<n; j++){
+			if(input[j]=='e') continue;
+			if(newStates[NFATransitions[states[i]][input[j]-97]][0]==-1) continue;
+			k=0;
+			printf("{ ");
+			while(newStates[states[i]][k] != -1){
+				printf("q%d, ",newStates[states[i]][k]);
+				k++;
+			}
+			printf("}    %c    { ",input[j]);
+			k=0;
+			while(newStates[NFATransitions[states[i]][input[j]-97]][k] != -1){
+				printf("q%d, ",newStates[NFATransitions[states[i]][input[j]-97]][k]);
+				k++;
+			}
+			printf("}\n");
+		}
+	}
+	printf("\n\nFinal States:   ");
+	for(i=0; i< nNewStates; i++){
+		k=0;
+		while(newStates[states[i]][k] != -1){
+			if(isElementInArray(finalStates, nFinalState, newStates[states[i]][k])){
+				k=0;
+				printf("{ ");
+				while(newStates[states[i]][k] != -1){
+					printf("q%d, ",newStates[states[i]][k]);
+					k++;
+				}
+				printf("}   ");
+				break;
+			}
+			k++;
+		}
+	}
+	printf("\n");
     return 0;
 }
