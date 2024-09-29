@@ -60,7 +60,6 @@ int main(){
 				break;
 			}
 		}
-		
 		if(isalpha(ch)){
 			buffer[j++]=ch;
 		}
