@@ -16,24 +16,21 @@ static int set[20],nostate,noalpha,s,notransition,nofinal,start,finalstate[20],r
 char alphabet[20], c;
 static int e_closure[20][20]={0};
 struct node * transition[20][20]={NULL};
-void main()
-{
-           int i,j,k,m,t,n;
+void main(){
+        int i,j,k,m,t,n;
 
-           struct node *temp;
-           printf("enter the number of alphabets?\n");
-           scanf("%d",&noalpha);
-           getchar();
-           printf("NOTE:- [ use letter e as epsilon]\n");
+        struct node *temp;
+        printf("enter the number of alphabets?\n");
+        scanf("%d",&noalpha);
+        getchar();
+        printf("NOTE:- [ use letter e as epsilon]\n");
 
-          printf("NOTE:- [e must be last character ,if it is present]\n");
+        printf("NOTE:- [e must be last character ,if it is present]\n");
 
-          printf("\nEnter alphabets?\n");
-          for(i=0;i<noalpha;i++)
-         {
-
-                  alphabet[i]=getchar();
-                  getchar();
+        printf("\nEnter alphabets?\n");
+        for(i=0;i<noalpha;i++){
+                alphabet[i]=getchar();
+                getchar();
         }
         printf("Enter the number of states?\n");
         scanf("%d",&nostate);
@@ -49,10 +46,7 @@ void main()
         printf("NOTE:- [Transition is in the form--> qno   alphabet   qno]\n");
         printf("NOTE:- [States number must be greater than zero]\n");
         printf("\nEnter transition?\n");
-        for(i=0;i<notransition;i++)
-        {
-
-
+        for(i=0;i<notransition;i++){
                 scanf("%d %c%d",&r,&c,&s);
                 insert_trantbl(r,c,s);
 
@@ -60,14 +54,11 @@ void main()
 
         printf("\n");
 
-        for(i=1;i<=nostate;i++)
-        {
+        for(i=1;i<=nostate;i++){
                 c=0;
-                for(j=0;j<20;j++)
-
-                {
-                              buffer[j]=0;
-                               e_closure[i][j]=0;
+                for(j=0;j<20;j++){
+                        buffer[j]=0;
+                        e_closure[i][j]=0;
                 }
                 findclosure(i,i);
         }
@@ -84,43 +75,31 @@ void main()
 
         printf("\nTnransitions are...:\n");
 
-        for(i=1;i<=nostate;i++)
-        {
-
-                  for(j=0;j<noalpha-1;j++)
-                 {
-                          for(m=1;m<=nostate;m++)
-                                        set[m]=0;
-                          for(k=0;e_closure[i][k]!=0;k++)
-                          {
-
-                                    t=e_closure[i][k];
-                                   temp=transition[t][j];
-                                   while(temp!=NULL)
-                                  {
-
-                                             unionclosure(temp->st);
-                                            temp=temp->link;
-                                   }
-                         }
+        for(i=1;i<=nostate;i++){
+                for(j=0;j<noalpha-1;j++){
+                        for(m=1;m<=nostate;m++)
+                        set[m]=0;
+                        for(k=0;e_closure[i][k]!=0;k++){
+                                t=e_closure[i][k];
+                                temp=transition[t][j];
+                                while(temp!=NULL){
+                                        unionclosure(temp->st);
+                                        temp=temp->link;
+                                }
+                        }
                         printf("\n");
                         print_e_closure(i);
                         printf("%c\t",alphabet[j]   );
                         printf("{");
-                        for(n=1;n<=nostate;n++)
-                        {
-                                     if(set[n]!=0)
-                                             printf("q%d,",n);
+                        for(n=1;n<=nostate;n++){
+                                if(set[n]!=0)
+                                        printf("q%d,",n);
                         }
-                         printf("}");
+                        printf("}");
                 }
         }
         printf("\n Final states:");
         findfinalstate();
-
-
-
-
 }
 
 void findclosure(int x,int sta)
@@ -128,7 +107,7 @@ void findclosure(int x,int sta)
             struct node *temp;
             int i;
            if(buffer[x])
-                     return;
+                return;
              e_closure[sta][c++]=x;
             buffer[x]=1;
              if(alphabet[noalpha-1]=='e' && transition[x][noalpha-1]!=NULL)
@@ -180,33 +159,21 @@ void unionclosure(int i)
                       j++;
              }
 }
-void findfinalstate()
-{
-            int i,j,k,t;
-            for(i=0;i<nofinal;i++)
-           {
-                      for(j=1;j<=nostate;j++)
-                      {
-                              for(k=0;e_closure[j][k]!=0;k++)
-                                {
-                                         if(e_closure[j][k]==finalstate[i])
-                                        {
+void findfinalstate(){
+        int i,j,k,t;
+        for(i=0;i<nofinal;i++)
+                for(j=1;j<=nostate;j++)
+                        for(k=0;e_closure[j][k]!=0;k++)
+                                if(e_closure[j][k]==finalstate[i])
+                                        printf("q%d,  ",j);
+        printf("\n");
+}
 
-                                                 print_e_closure(j);
-                                        }
-                               }
-                      }
-             }
-
-
-  }
-
-void print_e_closure(int i)
-{
+void print_e_closure(int i){
         int j;
         printf("{");
         for(j=0;e_closure[i][j]!=0;j++)
-                        printf("q%d,",e_closure[i][j]);
-         printf("}\t");
+                printf("q%d,",e_closure[i][j]);
+        printf("}\t");
 }
 
