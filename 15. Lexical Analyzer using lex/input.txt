@@ -1,0 +1,8 @@
+void main(){
+    int x=2;
+    if(x<1)
+        z=1.5;
+    else
+        z=10.5+5;
+    printf(z);
+}
