@@ -1,9 +1,7 @@
 %{
 #include<stdio.h>
-
 int n;
 %}
-
 %%
 "while"|"if"|"else"|"char"|"void" {
     n++;
@@ -33,7 +31,6 @@ int n;
     n++;
     printf("\t integer: %s\n",yytext);
 }
-
 %%
 int main(){
     yyin=fopen("input.txt","r");
